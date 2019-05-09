@@ -1,5 +1,9 @@
 /**********************************************/
 //DATA
+  
+  	//settings
+  	const minimumBet = 5,
+          startingBank = 100;
 
     //player data
 	const player = {},
@@ -52,9 +56,10 @@
     }
       
 	//HTML data
-    var hitButton, stayButton, startButton,
-        betSlider, bankDetails,
-        houseCards, playerCards;
+    var hitButton, stayButton, playButton,
+        playerBank, playerTotal, houseTotal,
+        houseCards, playerCards,
+        gameResult;
 
       
 /**********************************************/
@@ -67,14 +72,22 @@
         //populate HTML data
         hitButton = document.getElementById("hitButton");
         stayButton = document.querySelector("#stayButton");
+      	playButton = document.querySelector("#playButton");
         houseCards = document.querySelector("#houseCards");
         playerCards = document.getElementById("playerCards");
+      	playerTotal = document.getElementById("playerTotal");
+      	houseTotal = document.querySelector("#houseTotal");
+      	gameResult = document.querySelector("#gameResult");
+      	playerBank = document.querySelector("#playerBank");
 
         //assign event listeners and handlers
         hitButton.addEventListener("click", handleHitButtonClick);
         stayButton.addEventListener("click", handleStayButtonClick);
-        //startButton.addEventListener("click", handleStartButtonClick);
-        //betSlider.addEventListener("input", handleBetSliderInput);
+        playButton.addEventListener("click", handlePlayButtonClick);
+      
+      	//start player with some money
+      	player.bank = startingBank;
+      	player.bet = minimumBet;
 
         //start game
         setup();
@@ -88,6 +101,8 @@
 
         //deal two cards to player, remove any from last hand
         player.cards = [getNextCard(), getNextCard()];
+      	player.total = getHandTotal(player.cards);
+      	displayPlayerTotal();
 
         //deal one card to house, remove any from last hand
         house.cards = [getNextCard()];
@@ -95,6 +110,15 @@
         //display cards
         displayHouseCards();
         displayPlayerCards();
+      
+      	//remove last hand's game result
+      	gameResult.textContent = "";
+      
+      	//remove last hand's house total
+      	houseTotal.textContent = "";
+      
+      	//display player bank amount
+      	displayPlayerBank();
     }
       
 /**********************************************/
@@ -128,27 +152,115 @@
 	function getCardHTML(card){
     	//give this function a card object
       	//get back HTML code as a JS string
-      	return `<figure class="${card.color}">${card.face}${card.suit}</figure>`;
+      	return ` <figure class="${card.color}">${card.face}${card.suit}</figure>`;
+    }
+  
+  	function displayPlayerTotal(){
+    	playerTotal.textContent = player.total;
+    }
+  
+  	function displayHouseTotal(){
+      	houseTotal.textContent = house.total;
+    }
+  
+  	function displayPlayerBank(){
+    	playerBank.textContent = "$ " + player.bank;
     }
 
   
 /**********************************************/
 //LOGIC
+  
+	function getHandTotal(cards){
+      	var aceIndices = [];
+    	//accumulator pattern
+      	var total = 0; //define the accumulator variable
+      	//iterate through cards array
+      	for (let i=0; i<cards.length; i++){
+        	//"accumulate"
+          	total += cards[i].value;
+          	if (cards[i].value === 11) aceIndices.push(i);
+        }
+      	//check for changing aces from 11 to 1
+      	if (total > 21 && aceIndices.length > 0){
+        	var firstAceIndex = aceIndices[0]; //first ace worth 11 points
+          	cards[firstAceIndex].value = 1; 
+          	return getHandTotal(cards); //recursion!!!!
+        }
+      	//return accumulator
+      	else return total;
+    }
+  
+  	function houseTurn(){
+    	house.cards.unshift(getNextCard()); //add to the beginning
+      	house.total = getHandTotal(house.cards);
+      	while(house.total < 17){
+        	house.cards.push(getNextCard());
+            house.total = getHandTotal(house.cards);
+		}
+      	displayHouseCards();
+      	displayHouseTotal();
+      	resolveWinLose();
+    }
+  
+  	function resolveWinLose(){
+    	//only happens if player doesn't go over 21
+      	if (house.total > 21 || player.total > house.total) playerWins();
+      	//house wins with ties or when house total is greater than player total
+      	else playerLoses();
+    }
+  
+  	function playerWins(){
+      	gameResult.textContent = `You Win $ ${minimumBet}!`;
+      	player.bank += minimumBet;
+      	displayPlayerBank();
+      	//
+      	playButton.classList.remove("hidden"); //reveal the play button .     
+      	hitButton.classList.add("hidden"); //hide the hit button
+      	stayButton.classList.add("hidden"); //hide the play button
+    }
+  
+  	function playerLoses(){
+      	gameResult.textContent = `You lose $ ${minimumBet} :(`;
+      	player.bank -= minimumBet;
+      	displayPlayerBank();
+      	//
+      	if (player.bank < minimumBet){
+        	//bankrupt!!
+          	alert("You're bankrupt!! :((\nPlay Again.");
+          	player.bank = startingBank;
+          	setup();
+        }
+      	else {
+            playButton.classList.remove("hidden"); //reveal the play button .     
+            hitButton.classList.add("hidden"); //hide the hit button
+            stayButton.classList.add("hidden"); //hide the play button
+        }
+    }
+  
+/**********************************************/
+//EVENT HANDLING
       
 	//event handlers
     function handleHitButtonClick(){
     	player.cards.push(getNextCard());
       	displayPlayerCards();
+      	player.total = getHandTotal(player.cards);
+      	displayPlayerTotal();
+      	if (player.total > 21) playerLoses();
     }
       
     function handleStayButtonClick(){
     	//it's now house's turn...
-      	//replace facedown card with a new one
-      	house.cards.unshift(getNextCard()); //add to the beginning
-      	displayHouseCards();
+      	houseTurn();      	
     }
       
-    function handlePlayButtonClick(){}
+    function handlePlayButtonClick(){
+    	playButton.classList.add("hidden"); //hide the play button
+      	hitButton.classList.remove("hidden"); //reveal the hit button
+      	stayButton.classList.remove("hidden"); //reveal the stay button
+      	setup();
+    }
       
     function handleBetSliderInput(){}
       
