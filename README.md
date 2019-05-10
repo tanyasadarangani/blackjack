@@ -4,16 +4,10 @@ At the start of a Blackjack game, the players and the dealer receive two cards e
 Blackjack's precursor was twenty-one, a game of unknown origin
 
 ☐ Screenshot(s): Images of your actual game.
-
-
-
-
- 
-
-
-
-
-
+![alt text](https://imgur.com/Q5skYhz.png)
+![alt text](https://imgur.com/qfi4Ana.png)
+![alt text](https://imgur.com/Rozo6QE.png) 
+![alt text](https://imgur.com/hT0CUxf) 
 
 ☐ Technologies Used: List of the technologies used, e.g., 
 JavaScript, HTML, CSS
