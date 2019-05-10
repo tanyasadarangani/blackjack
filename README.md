@@ -7,7 +7,7 @@ Blackjack's precursor was twenty-one, a game of unknown origin
 ![alt text](https://imgur.com/Q5skYhz.png)
 ![alt text](https://imgur.com/qfi4Ana.png)
 ![alt text](https://imgur.com/Rozo6QE.png) 
-![alt text](https://imgur.com/hT0CUxf) 
+![alt text](https://imgur.com/hT0CUxf.png) 
 
 ☐ Technologies Used: List of the technologies used, e.g., 
 JavaScript, HTML, CSS
